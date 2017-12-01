@@ -1,6 +1,5 @@
 package net.bot.entities;
 
-import static net.bot.util.RandomUtil.rand;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glBegin;
 import static org.lwjgl.opengl.GL11.glColor3f;

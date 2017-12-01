@@ -1,0 +1,46 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+
+repositories {
+  mavenCentral() 
+}
+
+project.ext.lwjglVersion = "3.0.0a"
+
+dependencies {
+  compile "org.lwjgl:lwjgl:${lwjglVersion}"
+  compile "org.lwjgl:lwjgl-platform:${lwjglVersion}:natives-windows"
+  compile "org.lwjgl:lwjgl-platform:${lwjglVersion}:natives-linux"
+  compile "org.lwjgl:lwjgl-platform:${lwjglVersion}:natives-osx"
+  compile group: 'org.joml', name: 'joml', version: '1.9.6'
+}
+
+// Define LWJGL Version
+// project.ext.lwjglVersion = "2.9.3"
+
+// dependencies {
+//   compile "org.lwjgl.lwjgl:lwjgl:${lwjglVersion}"
+//   compile "org.lwjgl.lwjgl:lwjgl_util:${lwjglVersion}"
+// }
+
+// Workaround for copying in native libraries
+// ['windows', 'linux', 'osx'].each { 
+//   platform -> task "${platform}Natives" {
+//     inputs.files(configurations.compile)
+//     outputs.dir("$buildDir/natives-$platform")
+//     // doLast {
+//     copy {
+//       def artifacts = configurations.compile.resolvedConfiguration.resolvedArtifacts
+//                       .findAll { it.classifier == "natives-$platform" }
+//       artifacts.each {
+//         from zipTree(it.file)
+//       }
+//       into "$buildDir/natives-$platform"
+//     }
+//     // }
+//   }
+// }
+
+// Application configuration
+mainClassName = "net.bot.MainModel"

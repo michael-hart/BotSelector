@@ -10,7 +10,6 @@ import net.bot.entities.AbstractEntityBot;
 import net.bot.entities.Entity;
 import net.bot.entities.Entity.State;
 import net.bot.entities.EntityBot;
-import net.bot.entities.EntityDiseasedBot;
 import net.bot.entities.EntityFoodSpeck;
 import net.bot.event.handler.DisplayEventHandler;
 import net.bot.event.handler.EntityEventHandler;

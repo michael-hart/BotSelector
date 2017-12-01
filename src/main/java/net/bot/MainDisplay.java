@@ -1,19 +1,19 @@
 package net.bot;
 
 import net.bot.entities.EntityBot;
-import net.bot.entities.EntityDiseasedBot;
 import net.bot.event.handler.DisplayEventHandler;
 import net.bot.event.handler.EntityEventHandler;
 import net.bot.event.handler.KeyboardEventHandler;
 import net.bot.event.listener.IKeyboardEventListener;
 import static net.bot.util.MainDisplayConstants.*;
 
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.util.Color;
-import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.LWJGLUtil;
+//import org.lwjgl.LWJGLException;
+//import org.lwjgl.input.Keyboard;
+//import org.lwjgl.opengl.Display;
+//import org.lwjgl.opengl.DisplayMode;
+//import org.lwjgl.util.Color;
+//import org.lwjgl.util.vector.Vector2f;
 
 import static org.lwjgl.opengl.GL11.*;
 

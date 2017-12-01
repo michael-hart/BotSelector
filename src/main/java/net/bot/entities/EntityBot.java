@@ -1,6 +1,5 @@
 package net.bot.entities;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import net.bot.disease.Disease;
