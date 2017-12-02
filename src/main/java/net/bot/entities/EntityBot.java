@@ -5,10 +5,10 @@ import java.util.List;
 import net.bot.disease.Disease;
 import net.bot.event.handler.EntityEventHandler;
 import static net.bot.util.RandomUtil.rand;
-import static org.lwjgl.opengl.GL11.*;
+import net.bot.util.Colour;
+import net.bot.util.Vector2f;
 
-import org.lwjgl.util.Color;
-import org.lwjgl.util.vector.Vector2f;
+import static org.lwjgl.opengl.GL11.*;
 
 public class EntityBot extends AbstractEntityBot {
 	
@@ -27,7 +27,7 @@ public class EntityBot extends AbstractEntityBot {
 	
 	public EntityBot() {
 		super();
-		this.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
+		this.setColour(new Colour(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
 		setPosition(new Vector2f(rand.nextFloat(), rand.nextFloat()));
 		
 		// Any neater way to do this?
@@ -43,9 +43,9 @@ public class EntityBot extends AbstractEntityBot {
 		
 	}
 	
-	public EntityBot(Color color, Vector2f position, Vector2f velocity, float foodLevel) {
+	public EntityBot(Colour colour, Vector2f position, Vector2f velocity, float foodLevel) {
 		super();
-		setColor(color);
+		setColour(colour);
 		setPosition(position);
 		setVelocity(velocity);
 		setFoodLevel(foodLevel);
@@ -108,7 +108,7 @@ public class EntityBot extends AbstractEntityBot {
 		
 		float size = getSize();
 		glBegin(GL_TRIANGLES);
-		glColor3f(getColor().getRed()/256F, getColor().getGreen()/256F, getColor().getBlue()/256F);
+		glColor3f(getColour().getRed()/256F, getColour().getGreen()/256F, getColour().getBlue()/256F);
 		glVertex3f(0, size, 0);
 		glVertex3f(size, -size, 0);
 		glVertex3f(-size, -size, 0);
@@ -147,7 +147,7 @@ public class EntityBot extends AbstractEntityBot {
 				getVelocity().y * (rand.nextFloat() * 0.5f + 0.75f)
 				);
 		Vector2f offspringPosition = new Vector2f(getPosition().x, getPosition().y);
-		Color offspringColor = new Color(getColor().getRed(), getColor().getGreen(), getColor().getBlue());
+		Colour offspringColor = new Colour(getColour().getRed(), getColour().getGreen(), getColour().getBlue());
 		
 		// Alter parent's lost food
 		setFoodLevel(getFoodLevel() - offspringFood);
@@ -179,7 +179,7 @@ public class EntityBot extends AbstractEntityBot {
 	 * @param entity
 	 */
 	public void addForce(Entity entity) {
-		if (entity.getColor().equals(getColor())) {
+		if (entity.getColour().equals(getColour())) {
 			return;
 		} 
 		// Check distance

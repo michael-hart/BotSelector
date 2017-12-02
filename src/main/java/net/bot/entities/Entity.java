@@ -1,7 +1,7 @@
 package net.bot.entities;
 
-import org.lwjgl.util.Color;
-import org.lwjgl.util.vector.Vector2f;
+import net.bot.util.Colour;
+import net.bot.util.Vector2f;
 
 public abstract class Entity {
 	
@@ -9,7 +9,7 @@ public abstract class Entity {
 //	private static final double G = 0.00003;
 	
 	private State mState;
-	private Color mColor;
+	private Colour mColour;
 	private Vector2f mPosition, mVelocity;
 //	private int mFramesAlive = 0;
 	private float mSize, mFoodLevel;
@@ -38,12 +38,12 @@ public abstract class Entity {
 		return mSize;
 	}
 
-	public Color getColor() {
-		return mColor;
+	public Colour getColour() {
+		return mColour;
 	}
 
-	public void setColor(Color color) {
-		this.mColor = color;
+	public void setColour(Colour color) {
+		this.mColour = color;
 	}
 
 	public void setSize(float size) {
@@ -57,7 +57,7 @@ public abstract class Entity {
 	
 	public Entity() {
 		mState = State.ALIVE;
-		mColor = new Color(255, 255, 255);
+		mColour = new Colour(255, 255, 255);
 	}
 	
 	public enum State {

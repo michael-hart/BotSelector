@@ -8,8 +8,7 @@ import net.bot.entities.EntityFoodSpeck;
 import net.bot.event.handler.EntityEventHandler;
 import net.bot.event.handler.FoodSourceEventHandler;
 import net.bot.util.RandomUtil;
-
-import org.lwjgl.util.vector.Vector2f;
+import net.bot.util.Vector2f;
 
 public class FoodSource {
 

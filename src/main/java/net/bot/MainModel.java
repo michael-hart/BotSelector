@@ -18,10 +18,8 @@ import net.bot.event.listener.IDisplayEventListener;
 import net.bot.event.listener.IEntityEventListener;
 import net.bot.event.listener.IFoodSourceEventListener;
 import net.bot.food.FoodSource;
-import net.bot.input.KeyboardInput;
 import net.bot.util.RandomUtil;
-
-import org.lwjgl.util.vector.Vector2f;
+import net.bot.util.Vector2f;
 
 public class MainModel {
 	
@@ -207,7 +205,7 @@ public class MainModel {
 				if (entity instanceof AbstractEntityBot) {
 					bot.resolveContagiousDiseases((AbstractEntityBot) entity);
 				}
-			} else if (bot.getColor().equals(entity.getColor())) {
+			} else if (bot.getColour().equals(entity.getColour())) {
 				if (entity instanceof AbstractEntityBot) {
 					bot.resolveContagiousDiseases((AbstractEntityBot) entity);
 				}
@@ -239,7 +237,6 @@ public class MainModel {
 	
 	public static void main(String[] args) {
 		new MainModel();
-		new KeyboardInput();
 		MainDisplay display = new MainDisplay();
 		display.run();
 	}

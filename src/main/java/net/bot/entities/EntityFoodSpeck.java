@@ -4,8 +4,8 @@ import static net.bot.util.RandomUtil.rand;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import org.lwjgl.util.Color;
-import org.lwjgl.util.vector.Vector2f;
+import net.bot.util.Colour;
+import net.bot.util.Vector2f;
 
 public class EntityFoodSpeck extends Entity {
 	
@@ -37,11 +37,11 @@ public class EntityFoodSpeck extends Entity {
 		
 		glPushMatrix();
 		
-		Color color = getColor();
+		Colour colour = getColour();
 		Vector2f position = getPosition();
-		glColor3f(color.getRed()/256F, color.getGreen()/256F, color.getBlue()/256F);
+		glColor3f(colour.getRed()/256F, colour.getGreen()/256F, colour.getBlue()/256F);
 		glTranslatef(position.x, position.y, 0);
-		
+
 		glBegin(GL_QUADS);
 		float temp = getSize()/2;
 		glVertex2f(temp, temp);

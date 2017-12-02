@@ -13,11 +13,10 @@ import static org.lwjgl.opengl.GL11.glVertex3f;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.lwjgl.util.Color;
-import org.lwjgl.util.vector.Vector2f;
-
 import net.bot.disease.Disease;
 import net.bot.event.handler.EntityEventHandler;
+import net.bot.util.Colour;
+import net.bot.util.Vector2f;
 
 public class EntityDiseasedBot extends AbstractEntityBotDecorator { //Decorator
 	
@@ -84,7 +83,7 @@ public class EntityDiseasedBot extends AbstractEntityBotDecorator { //Decorator
 		
 		float size = getSize()/2;
 		glBegin(GL_TRIANGLES);
-		glColor3f(getColor().getBlue()/256F, getColor().getRed()/256F, getColor().getGreen()/256F);
+		glColor3f(getColour().getBlue()/256F, getColour().getRed()/256F, getColour().getGreen()/256F);
 		glVertex3f(0, size, 0);
 		glVertex3f(size, -size, 0);
 		glVertex3f(-size, -size, 0);
@@ -134,13 +133,13 @@ public class EntityDiseasedBot extends AbstractEntityBotDecorator { //Decorator
 	}
 
 	@Override
-	public Color getColor() {
-		return bot.getColor();
+	public Colour getColour() {
+		return bot.getColour();
 	}
 
 	@Override
-	public void setColor(Color color) {
-		bot.setColor(color);
+	public void setColour(Colour colour) {
+		bot.setColour(colour);
 	}
 
 	@Override
