@@ -5,10 +5,12 @@ import net.bot.entities.EntityFoodSpeck;
 
 public interface IEntityEventListener {
 
-	void onBotCreated(AbstractEntityBot bot);
-	void onBotDestroyed(AbstractEntityBot bot);
-	
-	void onFoodCreated(EntityFoodSpeck speck);
-	void onFoodDestroyed(EntityFoodSpeck speck);
-	
+    void onBotCreated(AbstractEntityBot bot);
+
+    void onBotDestroyed(AbstractEntityBot bot);
+
+    void onFoodCreated(EntityFoodSpeck speck);
+
+    void onFoodDestroyed(EntityFoodSpeck speck);
+
 }

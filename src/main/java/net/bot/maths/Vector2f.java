@@ -1,4 +1,4 @@
-package net.bot.util;
+package net.bot.maths;
 
 public class Vector2f {
 
