@@ -1,6 +1,11 @@
+# Ignore built files
 bin
 build
 .metadata
+.class
+
+# Ignore gradle build folder
+.gradle
 
 # Ignore eclipse files
 .project
