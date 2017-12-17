@@ -33,6 +33,7 @@ public class EntityFoodSpeck extends Entity {
             0, 2, 3,
             0, 1, 3
     };
+    private boolean graphicsInit = false;
 
     public EntityFoodSpeck() {
         super();
@@ -42,8 +43,6 @@ public class EntityFoodSpeck extends Entity {
         setPosition(new Vector2f(rand.nextFloat(), rand.nextFloat()));
         setVelocity(new Vector2f(0, 0));
         setFoodLevel(getSize() * 10);
-        mShader = ShaderLoader.getShader(ShaderLoader.KEY_FOOD_SPECK_SHADER);
-        mVAO = new VertexArray(mVertexBuf, mIndexBuf);
     }
 
     @Override
@@ -53,6 +52,10 @@ public class EntityFoodSpeck extends Entity {
 
     @Override
     public void draw() {
+        if (!graphicsInit) {
+            initGraphics();
+        }
+
         // Assume that the shader has already been enabled
 
         // Set required uniform variables
@@ -71,6 +74,11 @@ public class EntityFoodSpeck extends Entity {
     @Override
     public void consume(Entity entity) {
         // Do nothing
+    }
+
+    private void initGraphics() {
+        mShader = ShaderLoader.getShader(ShaderLoader.KEY_FOOD_SPECK_SHADER);
+        mVAO = new VertexArray(mVertexBuf, mIndexBuf);
     }
 
 }

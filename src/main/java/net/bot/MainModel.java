@@ -5,41 +5,34 @@ import static net.bot.util.SimRegisterConstants.INITIAL_BOT_ENTITIES;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import net.bot.entities.AbstractEntityBot;
-import net.bot.entities.Entity;
-import net.bot.entities.Entity.State;
 import net.bot.entities.EntityBot;
 import net.bot.entities.EntityFoodSpeck;
-import net.bot.event.handler.DisplayEventHandler;
 import net.bot.event.handler.EntityEventHandler;
 import net.bot.event.handler.FoodSourceEventHandler;
-import net.bot.event.listener.IDisplayEventListener;
 import net.bot.event.listener.IEntityEventListener;
 import net.bot.event.listener.IFoodSourceEventListener;
 import net.bot.food.FoodSource;
-import net.bot.graphics.ShaderLoader;
 import net.bot.util.RandomUtil;
-import net.bot.maths.Vector2f;
 
+/**
+ * Simple model containing the application data during runtime
+ */
 public class MainModel {
 
-    private List<AbstractEntityBot> mBotEntityList, mBotsToAdd, mBotsToRemove;
-    private List<EntityFoodSpeck> mFoodEntityList, mFoodToAdd, mFoodToRemove;
+    private List<AbstractEntityBot> mBotEntityList;
+    private List<EntityFoodSpeck> mFoodEntityList;
     private List<FoodSource> mFoodSourceList, mFoodSourceToAdd, mFoodSourceToRemove;
+
+    private Semaphore mBotSem, mFoodSem, mSourceSem;
 
     public MainModel() {
 
-        DisplayEventHandler.addListener(new IDisplayEventListener() {
-            @Override
-            public void onUpdate(double delta) {
-                updateEntities(delta);
-                drawEntities();
-                updateFoodSources(delta);
-                drawFoodSources();
-            }
-
-        });
+        mBotSem = new Semaphore(1);
+        mFoodSem = new Semaphore(1);
+        mSourceSem = new Semaphore(1);
 
         mBotEntityList = new ArrayList<AbstractEntityBot>();
         for (int i = 0; i < INITIAL_BOT_ENTITIES; i++) {
@@ -51,11 +44,6 @@ public class MainModel {
             mFoodEntityList.add(new EntityFoodSpeck());
         }
 
-        mBotsToAdd = new ArrayList<AbstractEntityBot>();
-        mBotsToRemove = new ArrayList<AbstractEntityBot>();
-
-        mFoodToAdd = new ArrayList<EntityFoodSpeck>();
-        mFoodToRemove = new ArrayList<EntityFoodSpeck>();
         EntityEventHandler.addListener(new IEntityEventListener() {
             @Override
             public void onFoodDestroyed(EntityFoodSpeck speck) {
@@ -97,149 +85,33 @@ public class MainModel {
                 mFoodSourceToAdd.add(source);
             }
         });
-
     }
 
-    public void updateEntities(double delta) {
-
-        // Check for age in food specks
-        for (EntityFoodSpeck speck : mFoodEntityList) {
-            speck.update(delta);
-        }
-
-        // TODO remove after disease testing
-        /*
-         * for (AbstractEntityBot bot: mBotEntityList) { if (!bot.isDiseased()) {
-         * EntityDiseasedBot newBot = new EntityDiseasedBot(bot);
-         * mBotsToAdd.add(newBot); mBotsToRemove.add(bot); } }
-         */
-
-        // Sort out collisions
-        for (int i = 0; i < mBotEntityList.size(); i++) {
-            AbstractEntityBot bot = mBotEntityList.get(i);
-            bot.update(delta);
-
-            for (int j = 0; j < mBotEntityList.size(); j++) {
-                if (j > i) {
-                    collideOrConsume(bot, mBotEntityList.get(j));
-                }
-                if (j != i) {
-                    // Add forces for acceleration
-                    bot.addForce(mBotEntityList.get(j));
-                }
-            }
-            for (EntityFoodSpeck speck : mFoodEntityList) {
-                // Check for collision here
-                collideOrConsume(bot, speck);
-                bot.addForce(speck);
-            }
-        }
-
-        for (AbstractEntityBot bot : mBotEntityList) {
-            if (bot.getState() != State.ALIVE) {
-                mBotsToRemove.add(bot);
-            }
-        }
-        mBotEntityList.removeAll(mBotsToRemove);
-        mBotsToRemove.clear();
-        mBotEntityList.addAll(mBotsToAdd);
-        mBotsToAdd.clear();
-
-        for (EntityFoodSpeck food : mFoodEntityList) {
-            if (food.getState() == State.CONSUMED) {
-                mFoodToRemove.add(food);
-                // mFoodToAdd.add(new EntityFoodSpeck());
-            }
-        }
-        mFoodEntityList.removeAll(mFoodToRemove);
-        mFoodToRemove.clear();
-        mFoodEntityList.addAll(mFoodToAdd);
-        mFoodToAdd.clear();
-
+    public List<AbstractEntityBot> getBots() throws InterruptedException {
+        mBotSem.acquire();
+        return mBotEntityList;
     }
 
-    private void updateFoodSources(double delta) {
-        for (FoodSource source : mFoodSourceList) {
-            source.update(delta);
-        }
-        mFoodSourceList.removeAll(mFoodSourceToRemove);
-        mFoodSourceToRemove.clear();
-        mFoodSourceList.addAll(mFoodSourceToAdd);
-        mFoodSourceToAdd.clear();
+    public void releaseBots() {
+        mBotSem.release();
     }
 
-    private void drawFoodSources() {
-        for (FoodSource source : mFoodSourceList) {
-            source.draw();
-        }
+    public List<EntityFoodSpeck> getFood() throws InterruptedException {
+        mFoodSem.acquire();
+        return mFoodEntityList;
     }
 
-    private void collideOrConsume(AbstractEntityBot bot, Entity entity) {
-        Vector2f compare = new Vector2f();
-        Vector2f.sub(bot.getPosition(), entity.getPosition(), compare);
-        if (compare.length() <= bot.getSize() + entity.getSize()) {
-            // Collision!!
-            if (bot.getSize() == entity.getSize()) {
-                // Same size or same colour, so bounce off
-                Vector2f newBot = new Vector2f();
-                Vector2f newEntity = new Vector2f();
-                float massA = bot.getSize(), massB = entity.getSize();
-
-                Vector2f velA = new Vector2f(bot.getVelocity().x, bot.getVelocity().y);
-                Vector2f velB = new Vector2f(entity.getVelocity().x, entity.getVelocity().y);
-
-                velA.scale((float) ((massA - massB) / (massA + massB)));
-                velB.scale((float) ((massB * 2) / (massA + massB)));
-                Vector2f.add(velA, velB, newBot);
-
-                velA = new Vector2f(bot.getVelocity().x, bot.getVelocity().y);
-                velB = new Vector2f(entity.getVelocity().x, entity.getVelocity().y);
-
-                velB.scale((float) ((massB - massA) / (massA + massB)));
-                velA.scale((float) ((massA * 2) / (massA + massB)));
-                Vector2f.add(velA, velB, newEntity);
-
-                bot.setVelocity(newBot);
-                entity.setVelocity(newEntity);
-                if (entity instanceof AbstractEntityBot) {
-                    bot.resolveContagiousDiseases((AbstractEntityBot) entity);
-                }
-            } else if (bot.getColour().equals(entity.getColour())) {
-                if (entity instanceof AbstractEntityBot) {
-                    bot.resolveContagiousDiseases((AbstractEntityBot) entity);
-                }
-                return;
-            } else if (bot.getSize() < entity.getSize()) {
-                entity.consume(bot);
-            } else if (bot.getSize() > entity.getSize()) {
-                bot.consume(entity);
-            }
-            // else if (bot.getSize() < entity.getSize()) {
-            // entity.consume(bot);
-            // } else if (bot.getColor().equals(entity.getColor())) {
-            // // Do nothing :-)
-            // return;
-            // } else {
-            // bot.consume(entity);
-            // }
-        }
+    public void releaseFood() {
+        mFoodSem.release();
     }
 
-    public void drawEntities() {
-        ShaderLoader.getShader(ShaderLoader.KEY_BOT_SHADER).enable();
-        for (AbstractEntityBot bot : mBotEntityList) {
-            bot.draw();
-        }
-        ShaderLoader.getShader(ShaderLoader.KEY_FOOD_SPECK_SHADER).enable();
-        for (EntityFoodSpeck speck : mFoodEntityList) {
-            speck.draw();
-        }
+    public List<FoodSource> getSources() throws InterruptedException {
+        mSourceSem.acquire();
+        return mFoodSourceList;
     }
 
-    public static void main(String[] args) {
-        MainDisplay display = new MainDisplay();
-        new MainModel();
-        display.run();
+    public void releaseSources() {
+        mSourceSem.release();
     }
 
 }
