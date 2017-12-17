@@ -18,4 +18,4 @@ dependencies {
 }
 
 // Application configuration
-mainClassName = "net.bot.MainModel"
+mainClassName = "net.bot.LaunchSimulation"
