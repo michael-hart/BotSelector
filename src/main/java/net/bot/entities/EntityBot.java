@@ -37,6 +37,7 @@ public class EntityBot extends AbstractEntityBot {
             1f, -1f, 0f,
             0f, 1, 0f
     };
+    private boolean graphicsInit = false;
 
     public EntityBot() {
         super();
@@ -55,9 +56,6 @@ public class EntityBot extends AbstractEntityBot {
         setVelocity(new Vector2f(xVel, yVel));
         setSize(foodToSize(getFoodLevel()));
         mResolvedForce = new Vector2f(0, 0);
-
-        mVAO = new VertexArray(mBufData, new byte[] {0, 1, 2});
-        mShader = ShaderLoader.getShader(ShaderLoader.KEY_BOT_SHADER);
     }
 
     public EntityBot(Colour colour, Vector2f position, Vector2f velocity, float foodLevel) {
@@ -71,6 +69,13 @@ public class EntityBot extends AbstractEntityBot {
         mResolvedForce = new Vector2f(0, 0);
     }
 
+    public void initGraphics() {
+        // Create OpenGL objects
+        mVAO = new VertexArray(mBufData, new byte[] {0, 1, 2});
+        mShader = ShaderLoader.getShader(ShaderLoader.KEY_BOT_SHADER);
+        graphicsInit = true;
+    }
+    
     @Override
     public void update(double delta) {
 
@@ -106,6 +111,10 @@ public class EntityBot extends AbstractEntityBot {
 
     @Override
     public void draw() {
+        if (!graphicsInit) {
+            initGraphics();
+        }
+
         // Assume that the shader has already been enabled
 
         // Set required uniform variables

@@ -1,41 +1,92 @@
 package net.bot;
 
-import static net.bot.util.MainDisplayConstants.*;
-import static org.lwjgl.glfw.Callbacks.*;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static net.bot.util.MainDisplayConstants.BOARD_HEIGHT;
+import static net.bot.util.MainDisplayConstants.BOARD_WIDTH;
+import static net.bot.util.MainDisplayConstants.GAME_TITLE;
+import static net.bot.util.MainDisplayConstants.SCREEN_HEIGHT;
+import static net.bot.util.MainDisplayConstants.SCREEN_PAN;
+import static net.bot.util.MainDisplayConstants.SCREEN_WIDTH;
+import static net.bot.util.MainDisplayConstants.WINDOW_HEIGHT;
+import static net.bot.util.MainDisplayConstants.WINDOW_WIDTH;
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
+import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
+import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
+import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
+import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
+import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
+import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
+import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
+import static org.lwjgl.glfw.GLFW.glfwShowWindow;
+import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
+import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
+import static org.lwjgl.glfw.GLFW.glfwTerminate;
+import static org.lwjgl.glfw.GLFW.glfwWindowHint;
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.IOException;
 import java.nio.IntBuffer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
+import net.bot.entities.AbstractEntityBot;
 import net.bot.entities.EntityBot;
+import net.bot.entities.EntityFoodSpeck;
 import net.bot.event.handler.DisplayEventHandler;
 import net.bot.event.handler.EntityEventHandler;
 import net.bot.event.handler.KeyboardEventHandler;
 import net.bot.event.listener.IKeyboardEventListener;
+import net.bot.food.FoodSource;
 import net.bot.graphics.Shader;
 import net.bot.graphics.ShaderCompilationException;
 import net.bot.graphics.ShaderLoader;
-import net.bot.util.Colour;
 import net.bot.maths.Matrix4f;
 import net.bot.maths.Vector2f;
+import net.bot.util.Colour;
 
-public class MainDisplay {
+/**
+ * Contains code for loading and drawing graphical assets
+ *
+ */
+public class SimulationDisplay implements Runnable {
 
-    private double lastFrameTime = System.currentTimeMillis();
+    private static Logger log = LogManager.getLogger(SimulationDisplay.class);
+    
     private long window;
     private boolean[] arrowKeysPressed;
 
-    public MainDisplay() {
-        init();
+    private SimulationModel mModel;
 
+    public SimulationDisplay() {
         arrowKeysPressed = new boolean[4];
 
         KeyboardEventHandler.addListener(new IKeyboardEventListener() {
@@ -154,13 +205,16 @@ public class MainDisplay {
         try {
             ShaderLoader.loadAll();
         } catch (IOException | ShaderCompilationException e) {
-            e.printStackTrace();
+            log.error(e);
             return;
         }
 
     }
 
     public void run() {
+
+        init();
+        mModel = new SimulationModel();
 
         // Set the clear color
         glClearColor(0.2F, 0.2F, 0.2F, 0F);
@@ -174,6 +228,8 @@ public class MainDisplay {
 
         Vector2f viewOffset = new Vector2f();
 
+        DisplayEventHandler.initComplete();
+
         while (!glfwWindowShouldClose(window)) {
             updateViewOffset(arrowKeysPressed, viewOffset);
             pr_matrix = Matrix4f.orthographic(
@@ -186,14 +242,16 @@ public class MainDisplay {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            // Draw all entities and sources
+            drawFoodSources();
+            drawEntities();
+
             // Poll for window events. The key callback above will only be
             // invoked during this call.
             glfwPollEvents();
 
-            // Update all listeners with the latest delta
-            DisplayEventHandler.update(getDelta());
-
             glfwSwapBuffers(window); // swap the color buffers
+
         }
 
         // Free the window callbacks and destroy the window
@@ -203,13 +261,45 @@ public class MainDisplay {
         // Terminate GLFW and free the error callback
         glfwTerminate();
         glfwSetErrorCallback(null).free();
-
     }
 
-    private double getDelta() {
-        double delta = System.currentTimeMillis() - lastFrameTime;
-        lastFrameTime = System.currentTimeMillis();
-        return delta;
+    public SimulationModel getModel() {
+        return mModel;
+    }
+
+    private void drawFoodSources() {
+        try {
+            for (FoodSource source : mModel.getSources()) {
+                source.draw();
+            }
+        } catch (InterruptedException e) {
+            log.error(e);
+        }
+        mModel.releaseSources();
+    }
+
+    private void drawEntities() {
+        // Draw bots
+        ShaderLoader.getShader(ShaderLoader.KEY_BOT_SHADER).enable();
+        try {
+            for (AbstractEntityBot bot : mModel.getBots()) {
+                bot.draw();
+            }
+        } catch (InterruptedException e) {
+            log.error(e);
+        }
+        mModel.releaseBots();
+
+        // Draw food specks
+        ShaderLoader.getShader(ShaderLoader.KEY_FOOD_SPECK_SHADER).enable();
+        try {
+            for (EntityFoodSpeck speck : mModel.getFood()) {
+                speck.draw();
+            }
+        } catch (InterruptedException e) {
+            log.error(e);
+        }
+        mModel.releaseFood();
     }
 
     private void updateViewOffset(boolean[] directions, Vector2f offset) {
