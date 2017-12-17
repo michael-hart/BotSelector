@@ -20,7 +20,7 @@ import net.bot.util.RandomUtil;
 /**
  * Simple model containing the application data during runtime
  */
-public class MainModel {
+public class SimulationModel {
 
     private List<AbstractEntityBot> mBotEntityList;
     private List<EntityFoodSpeck> mFoodEntityList;
@@ -28,7 +28,7 @@ public class MainModel {
 
     private Semaphore mBotSem, mFoodSem, mSourceSem;
 
-    public MainModel() {
+    public SimulationModel() {
 
         mBotSem = new Semaphore(1);
         mFoodSem = new Semaphore(1);

@@ -77,16 +77,16 @@ import net.bot.util.Colour;
  * Contains code for loading and drawing graphical assets
  *
  */
-public class MainDisplay implements Runnable {
+public class SimulationDisplay implements Runnable {
 
-    private static Logger log = LogManager.getLogger(MainDisplay.class);
+    private static Logger log = LogManager.getLogger(SimulationDisplay.class);
     
     private long window;
     private boolean[] arrowKeysPressed;
 
-    private MainModel mModel;
+    private SimulationModel mModel;
 
-    public MainDisplay() {
+    public SimulationDisplay() {
         arrowKeysPressed = new boolean[4];
 
         KeyboardEventHandler.addListener(new IKeyboardEventListener() {
@@ -214,7 +214,7 @@ public class MainDisplay implements Runnable {
     public void run() {
 
         init();
-        mModel = new MainModel();
+        mModel = new SimulationModel();
 
         // Set the clear color
         glClearColor(0.2F, 0.2F, 0.2F, 0F);
@@ -263,7 +263,7 @@ public class MainDisplay implements Runnable {
         glfwSetErrorCallback(null).free();
     }
 
-    public MainModel getModel() {
+    public SimulationModel getModel() {
         return mModel;
     }
 

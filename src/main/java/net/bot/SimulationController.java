@@ -23,7 +23,7 @@ public class SimulationController implements Runnable {
 
     private static Logger log = LogManager.getLogger(SimulationController.class);
     
-    private MainModel mModel;
+    private SimulationModel mModel;
 
     private List<EntityFoodSpeck> mFoodAdditions, mFoodDeletions;
     private List<AbstractEntityBot> mBotAdditions, mBotDeletions;
@@ -35,7 +35,7 @@ public class SimulationController implements Runnable {
 
     private boolean running = true;
 
-    public SimulationController(MainModel model) {
+    public SimulationController(SimulationModel model) {
         mModel = model;
         mFoodAdditions = new ArrayList<>();
         mFoodDeletions = new ArrayList<>();
@@ -206,7 +206,7 @@ public class SimulationController implements Runnable {
 
     public static void main(String[] args) throws InterruptedException {
         // Create a thread for the display
-        MainDisplay display = new MainDisplay();
+        SimulationDisplay display = new SimulationDisplay();
         Thread displayThread = new Thread(display);
 
         // Wait for thread to finish initialising
